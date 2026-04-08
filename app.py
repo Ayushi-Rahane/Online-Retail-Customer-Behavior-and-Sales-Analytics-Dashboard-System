@@ -434,7 +434,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="filter-label"><i class="fa-solid fa-location-dot" style="margin-right:6px;"></i> Location</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label">📍 Location</div>', unsafe_allow_html=True)
     all_cities = sorted(raw_df["city"].dropna().unique().tolist())
     city_options = ["Select All"] + all_cities
     selected_cities = st.multiselect(
@@ -445,7 +445,7 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    st.markdown('<div class="filter-label"><i class="fa-solid fa-tags" style="margin-right:6px;"></i> Category</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label">🏷️ Category</div>', unsafe_allow_html=True)
     all_cats = sorted(raw_df["category"].dropna().unique().tolist())
     cat_options = ["Select All"] + all_cats
     selected_cats = st.multiselect(
@@ -456,7 +456,7 @@ with st.sidebar:
         label_visibility="collapsed"
     )
     
-    st.markdown('<div class="filter-label"><i class="fa-solid fa-calendar-days" style="margin-right:6px;"></i> Date Range</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label">📅 Date Range</div>', unsafe_allow_html=True)
     min_date = raw_df["order_date"].min().date()
     max_date = raw_df["order_date"].max().date()
 
@@ -467,7 +467,7 @@ with st.sidebar:
                             min_value=min_date, max_value=max_date,
                             label_visibility="collapsed")
 
-    st.markdown('<div class="filter-label"><i class="fa-solid fa-credit-card" style="margin-right:6px;"></i> Payment Type</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label">💳 Payment Type</div>', unsafe_allow_html=True)
     all_pay = sorted(raw_df["payment_type"].dropna().unique().tolist())
     pay_options = ["Select All"] + all_pay
     selected_pay = st.multiselect(
