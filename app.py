@@ -136,7 +136,14 @@ section[data-testid="stSidebar"] > div { padding: 0 !important; }
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: #212e21 !important;
-    margin: 20px 0 8px 0;
+    margin: 20px 0 8px 16px;
+}
+
+/* ── Sidebar wrapper margins ── */
+section[data-testid="stSidebar"] .stMultiSelect,
+section[data-testid="stSidebar"] .stDateInput {
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 /* ── Streamlit selectbox / multiselect / date ── */
@@ -336,7 +343,11 @@ def load_data(file_path: str = "final_cleaned_data.csv") -> pd.DataFrame:
     })
     df["order_date"]    = pd.to_datetime(df["order_date"], errors="coerce")
     df                  = df.dropna(subset=["order_date"])
-    df["category"]      = df["category"].replace("unknown", "Others").fillna("Others")
+    
+    # Remove rows where category or city is "unknown" or missing (filtering "undefine" data)
+    df = df[df["category"].notna() & (df["category"] != "unknown")]
+    df = df[df["city"].notna() & (df["city"] != "unknown")]
+    
     df["payment_type"]  = df["payment_type"].astype(str).str.split("|").str[0]
     df["year_month"]    = df["order_date"].dt.to_period("M").dt.to_timestamp()
     return df
@@ -423,7 +434,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="filter-label">📍 Location</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label"><i class="fa-solid fa-location-dot" style="margin-right:6px;"></i> Location</div>', unsafe_allow_html=True)
     all_cities = sorted(raw_df["city"].dropna().unique().tolist())
     city_options = ["Select All"] + all_cities
     selected_cities = st.multiselect(
@@ -434,7 +445,7 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    st.markdown('<div class="filter-label">🏷️ Category</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label"><i class="fa-solid fa-tags" style="margin-right:6px;"></i> Category</div>', unsafe_allow_html=True)
     all_cats = sorted(raw_df["category"].dropna().unique().tolist())
     cat_options = ["Select All"] + all_cats
     selected_cats = st.multiselect(
@@ -445,7 +456,7 @@ with st.sidebar:
         label_visibility="collapsed"
     )
     
-    st.markdown('<div class="filter-label">📅 Date Range</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label"><i class="fa-solid fa-calendar-days" style="margin-right:6px;"></i> Date Range</div>', unsafe_allow_html=True)
     min_date = raw_df["order_date"].min().date()
     max_date = raw_df["order_date"].max().date()
 
@@ -456,7 +467,7 @@ with st.sidebar:
                             min_value=min_date, max_value=max_date,
                             label_visibility="collapsed")
 
-    st.markdown('<div class="filter-label">💳 Payment Type</div>', unsafe_allow_html=True)
+    st.markdown('<div class="filter-label"><i class="fa-solid fa-credit-card" style="margin-right:6px;"></i> Payment Type</div>', unsafe_allow_html=True)
     all_pay = sorted(raw_df["payment_type"].dropna().unique().tolist())
     pay_options = ["Select All"] + all_pay
     selected_pay = st.multiselect(
@@ -729,18 +740,29 @@ with tab3:
 
     # ── Category-wise sales ────────────────────────────────────
     with col_c1:
-        st.markdown('<div class="section-header"><span class="dot"></span>Sales by Category (Top 10)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"><span class="dot"></span>Category-wise Sales Distribution</div>', unsafe_allow_html=True)
         cat_sales = (df.groupby("category", as_index=False)["price"]
                     .sum().sort_values("price", ascending=False).head(10))
         if not cat_sales.empty:
-            fig_cat = px.bar(cat_sales, x="price", y="category",
-                            orientation="h",
-                            color="price",
-                            color_continuous_scale=[[0, "#1e4a56"], [0.5, TEAL_DARK], [1, TEAL]])
+            fig_cat = px.bar(
+                cat_sales, 
+                x="category", 
+                y="price",
+                title="Category-wise Sales Distribution",
+                labels={"category": "Category", "price": "Total Sales"},
+                color="price",
+                color_continuous_scale=[[0, "#85b378"], [0.5, "#3d7a88"], [1, "#1e4a56"]],
+                range_color=[0, cat_sales["price"].max()]
+            )
             fig_cat.update_traces(marker_line_width=0)
-            fig_cat.update_layout(yaxis=dict(autorange="reversed"))
-            fig_cat.update_xaxes(title="Total Sales (R$)")
-            fig_cat.update_yaxes(title="")
+            fig_cat.update_layout(
+                xaxis_tickangle=-45,
+                template="plotly_white",
+                showlegend=False,
+                coloraxis_colorbar=dict(yanchor="bottom", y=0, len=1)
+            )
+            fig_cat.update_yaxes(title="Total Sales", tickformat=".2s", rangemode="tozero")
+            fig_cat.update_xaxes(title="Category")
             theme(fig_cat)
             st.plotly_chart(fig_cat, use_container_width=True)
 
@@ -769,12 +791,25 @@ with tab3:
     city_sales = (df.groupby("city", as_index=False)["price"]
                 .sum().sort_values("price", ascending=False).head(10))
     if not city_sales.empty:
-        fig_city = px.bar(city_sales, x="city", y="price",
-                        color="price",
-                        color_continuous_scale=[[0, "#1e4a56"], [0.5, TEAL_DARK], [1, TEAL]])
+        fig_city = px.bar(
+            city_sales, 
+            x="city", 
+            y="price",
+            title="Top 10 Cities by Sales Distribution",
+            labels={"city": "City", "price": "Total Sales"},
+            color="price",
+            color_continuous_scale=[[0, "#85b378"], [0.5, "#3d7a88"], [1, "#1e4a56"]],
+            range_color=[0, city_sales["price"].max()]
+        )
         fig_city.update_traces(marker_line_width=0)
-        fig_city.update_xaxes(title="City", tickangle=-30)
-        fig_city.update_yaxes(title="Total Sales (R$)")
+        fig_city.update_layout(
+            xaxis_tickangle=-45,
+            template="plotly_white",
+            showlegend=False,
+            coloraxis_colorbar=dict(yanchor="bottom", y=0, len=1)
+        )
+        fig_city.update_yaxes(title="Total Sales", tickformat=".2s", rangemode="tozero")
+        fig_city.update_xaxes(title="City")
         theme(fig_city)
         st.plotly_chart(fig_city, use_container_width=True)
 
