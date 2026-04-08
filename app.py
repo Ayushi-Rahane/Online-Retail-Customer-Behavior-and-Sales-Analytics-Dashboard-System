@@ -679,24 +679,31 @@ fillcolor="rgba(231,134,68,0.2)"
 
     # ── Top performing months bar ──────────────────────────────
     st.markdown('<div class="section-header"><span class="dot"></span>Top Performing Months</div>', unsafe_allow_html=True)
+
     if not monthly_sales.empty:
-        top_months = monthly_sales.sort_values("price", ascending=False).head(12)
+        top_months = monthly_sales.sort_values("year_month")
+
         top_months["month_label"] = top_months["year_month"].dt.strftime("%b %Y")
-        fig_tm = px.bar(top_months, x="month_label", y="price",
-                        color="price",
-                        color_continuous_scale=[
-    [0, "#E1C699"],
-    [0.5, "#E78644"],
-    [1, "#C04000"]
-]
-)
+
+        fig_tm = px.bar(
+            top_months,
+            x="month_label",
+            y="price",
+            color="price",
+            color_continuous_scale=[
+                [0, "#E1C699"],
+                [0.5, "#E78644"],
+                [1, "#C04000"]
+            ]
+        )
+
         fig_tm.update_traces(marker_line_width=0)
         fig_tm.update_xaxes(title="Month", tickangle=-30)
         fig_tm.update_yaxes(title="Sales (R$)")
         fig_tm.update_layout(title_text="")
         theme(fig_tm)
-        st.plotly_chart(fig_tm, use_container_width=True)
 
+        st.plotly_chart(fig_tm, use_container_width=True)
 # ══════════════════════════════════════════════════════════════
 # TAB 3 — COMPARATIVE  (Member 4 — advanced_analysis part A)
 # ══════════════════════════════════════════════════════════════
