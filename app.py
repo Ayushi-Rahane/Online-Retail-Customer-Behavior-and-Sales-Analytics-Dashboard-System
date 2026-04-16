@@ -530,7 +530,7 @@ with tab1:
     col_snap, col_status = st.columns([2, 1])
 
     with col_snap:
-        st.markdown('<div class="section-header"><span class="dot"></span>Quick Sales Snapshot</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Quick Sales Snapshot</div>', unsafe_allow_html=True)
         snap = df.groupby("year_month", as_index=False)["price"].sum()
         if not snap.empty:
             fig_snap = px.area(snap, x="year_month", y="price", color_discrete_sequence=["#E78644"])
@@ -542,7 +542,7 @@ with tab1:
             st.plotly_chart(fig_snap, use_container_width=True)
 
     with col_status:
-        st.markdown('<div class="section-header"><span class="dot"></span>Order Status</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Order Status</div>', unsafe_allow_html=True)
         if "order_status" in df.columns:
             status_ct = df["order_status"].value_counts().reset_index()
             status_ct.columns = ["Status", "Count"]
@@ -553,11 +553,17 @@ with tab1:
             theme(fig_status)
             st.plotly_chart(fig_status, use_container_width=True)
 
-    with st.expander("View Dataset Preview"):
-        preview_cols = [c for c in ["order_id","order_date","city","category",
-                                    "price","payment_type","review_score"] if c in df.columns]
-        st.dataframe(style_table(df[preview_cols].head(50)), use_container_width=True)
+    st.markdown('<div class="section-header">Dataset Preview</div>', unsafe_allow_html=True)
 
+    preview_cols = [c for c in [
+        "order_id","order_date","city","category",
+        "price","payment_type","review_score"
+    ] if c in df.columns]
+
+    st.dataframe(
+        style_table(df[preview_cols].head(50)),
+        use_container_width=True
+    )
 # ══════════════════════════════════════════════════════════════
 # TAB 2 — TRENDS
 # ══════════════════════════════════════════════════════════════
@@ -570,7 +576,7 @@ with tab2:
     col_t1, col_t2 = st.columns(2)
 
     with col_t1:
-        st.markdown('<div class="section-header"><span class="dot"></span>Monthly Sales Trend</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Monthly Sales Trend</div>', unsafe_allow_html=True)
         if not monthly_sales.empty:
             fig_ms = go.Figure()
             fig_ms.add_trace(go.Scatter(
@@ -588,7 +594,7 @@ with tab2:
             st.plotly_chart(fig_ms, use_container_width=True)
 
     with col_t2:
-        st.markdown('<div class="section-header"><span class="dot"></span>Monthly Orders Trend</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Monthly Orders Trend</div>', unsafe_allow_html=True)
         if not monthly_orders.empty:
             fig_mo = go.Figure()
             fig_mo.add_trace(go.Scatter(
@@ -605,7 +611,7 @@ with tab2:
             theme(fig_mo)
             st.plotly_chart(fig_mo, use_container_width=True)
 
-    st.markdown('<div class="section-header"><span class="dot"></span>Top Performing Months</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Top Performing Months</div>', unsafe_allow_html=True)
     if not monthly_sales.empty:
         top_months = monthly_sales.sort_values("year_month").copy()
         top_months["month_label"] = top_months["year_month"].dt.strftime("%b %Y")
@@ -630,7 +636,7 @@ with tab3:
     col_c1, col_c2 = st.columns(2)
 
     with col_c1:
-        st.markdown('<div class="section-header"><span class="dot"></span>Category-wise Sales Distribution</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Category-wise Sales Distribution</div>', unsafe_allow_html=True)
         cat_sales = (df.groupby("category", as_index=False)["price"].sum().sort_values("price", ascending=False).head(10))
         if not cat_sales.empty:
             fig_cat = px.bar(
@@ -648,7 +654,7 @@ with tab3:
             st.plotly_chart(fig_cat, use_container_width=True)
 
     with col_c2:
-        st.markdown('<div class="section-header"><span class="dot"></span>Payment Method Distribution</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Payment Method Distribution</div>', unsafe_allow_html=True)
         pay_ct = df["payment_type"].value_counts().reset_index()
         pay_ct.columns = ["payment_type", "count"]
         if not pay_ct.empty:
@@ -658,7 +664,7 @@ with tab3:
             theme(fig_pay)
             st.plotly_chart(fig_pay, use_container_width=True)
 
-    st.markdown('<div class="section-header"><span class="dot"></span>Top 10 Cities by Sales</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Top 10 Cities by Sales</div>', unsafe_allow_html=True)
     city_sales = (df.groupby("city", as_index=False)["price"].sum().sort_values("price", ascending=False).head(10))
     if not city_sales.empty:
         fig_city = px.bar(
