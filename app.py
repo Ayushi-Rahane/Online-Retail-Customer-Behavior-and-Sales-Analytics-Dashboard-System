@@ -886,19 +886,35 @@ with tab4:
         st.markdown('<div class="section-header">Delivery Performance</div>', unsafe_allow_html=True)
 
         if "days_to_delivery" in df.columns:
-            delivery = df["days_to_delivery"].dropna()
+            df["delivery_speed"] = pd.cut(
+                df["days_to_delivery"],
+                bins=[0, 7, 20, 999],
+                labels=["Fast (0–7 days)", "Normal (8–20 days)", "Late (21+ days)"]
+            )
 
-            fig_del = go.Figure()
-            fig_del.add_trace(go.Histogram(
-                x=delivery,
-                nbinsx=30,
-                marker_color="#E78644",
-                name="Days to Delivery"
-            ))
+            speed_ct = (
+                df["delivery_speed"]
+                .value_counts()
+                .reindex(["Fast (0–7 days)", "Normal (8–20 days)", "Late (21+ days)"])
+                .reset_index()
+            )
+            speed_ct.columns = ["delivery_speed", "count"]
 
-            fig_del.update_xaxes(title="Days to Delivery")
+            fig_del = px.bar(
+                speed_ct,
+                x="delivery_speed",
+                y="count",
+                color="delivery_speed",
+                color_discrete_map={
+                    "Fast (0–7 days)"   : "#2E6F40",
+                    "Normal (8–20 days)": "#E78644",
+                    "Late (21+ days)"   : "#e05a5a"
+                }
+            )
+
+            fig_del.update_xaxes(title="Delivery Speed")
             fig_del.update_yaxes(title="Order Count")
-            fig_del.update_layout(title_text="")
+            fig_del.update_layout(title_text="", showlegend=False)
             theme(fig_del)
 
             st.markdown('<div class="chart-box">', unsafe_allow_html=True)
