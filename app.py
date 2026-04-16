@@ -854,8 +854,7 @@ with tab4:
 
     # ── City Clustering ─────────────────────────────────────
     run_clustering_analysis()
-
-    # ── Review Score & Delivery ─────────────────────────────
+# ── Review Score & Delivery ─────────────────────────────
     col_a1, col_a2 = st.columns(2)
 
     with col_a1:
@@ -925,13 +924,15 @@ with tab4:
     st.markdown('<div class="section-header">Numeric Summary</div>', unsafe_allow_html=True)
 
     num_cols = [c for c in [
-        "price", "review_score", "days_to_delivery",
-        "delivery_delay_days", "n_items"
+        "price", "total_price", "total_freight", "total_order_value",
+        "payment_value", "review_score", "days_to_delivery",
+        "delivery_delay_days", "n_items", "max_installments",
+        "product_weight_g"
     ] if c in df.columns]
 
     if num_cols:
         summary = df[num_cols].describe().round(2)
         st.dataframe(
-    style_table(summary),
-    use_container_width=True
-)
+            style_table(summary),
+            use_container_width=True
+        )
